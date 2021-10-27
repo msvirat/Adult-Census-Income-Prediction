@@ -16,7 +16,7 @@ abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
 '''
-df = pd.read_csv("D:/Project/Adult-Census-Income-Prediction/adult.csv")# For Loading csv data.
+df = pd.read_csv("C:/Users/Naushina Farheen S/Dropbox/My PC (DESKTOP-4RG72G3)/Documents/GitHub/Adult-Census-Income-Prediction/adult.csv")# For Loading csv data.
 
 
 
@@ -73,17 +73,21 @@ df['education_num'].describe()
 
 df['marital_status'].describe()
 df['marital_status'].unique()
+df['marital_status'] = df['marital_status'].replace('Never-married', 'Unmarried').replace('Married-civ-spouse', 'married').replace('Married-spouse-absent', 'married').replace('Married-AF-spouse', 'married').replace('Separated', 'Unmarried').replace('Widowed', 'Unmarried').replace('Divorced', 'Unmarried')
 
 
 df['occupation'].describe()
 df['occupation'].unique()
+df['occupation'] = df['occupation'].replace('Adm-clerical', 'Government').replace('Exec-managerial', 'Government').replace('Handlers-cleaners', 'Private').replace('Prof-specialty', 'Private').replace('Other-service', 'Private').replace('Sales', 'Private').replace('Transport-moving', 'Private').replace('Farming-fishing', 'Private').replace('Machine-op-inspct', 'Government').replace('Tech-support', 'Private').replace('Craft-repair', 'Private').replace('Protective-serv', 'Government').replace('Armed-Forces', 'Government').replace('Priv-house-serv', 'Private')
 
 
 df['relationship'].describe()
 df['relationship'].unique()
+df['relationship'] = df['relationship'].replace('Not-in-family', 'Others').replace('Husband', 'Family').replace('Own-child', 'Family').replace('Wife', 'Family').replace('Unmarried', 'Others').replace('Other-relative', 'Others')
 
 df['race'].describe()
 df['race'].unique()
+df['race'] = df['race'].replace('Asian-Pac-Islander', 'Other').replace('Amer-Indian-Eskimo', 'Other')
 
 df['sex'].describe()
 df['sex'].unique()
@@ -96,6 +100,7 @@ df['hpw'].describe()
 
 df['country'].describe()
 df['country'].unique()
+df['country'] = df['country'].replace('United-States', 'APAC').replace('Canada', 'APAC').replace('India', 'NAM').replace('China', 'APAC').replace('Vietnam', 'APAC').replace('Laos', 'APAC').replace('Germany', 'EMEA').replace('Portugal', 'EMEA').replace('Mexico', 'LATAM').replace('Jamaica', 'LATAM').replace('Puerto-Rico', 'LATAM').replace('Honduras', 'LATAM').replace('Cuba', 'NAM').replace('Haiti', 'EMEA').replace('Outlying-US(Guam-USVI-etc)', 'NAM').replace('Nicaragua', 'APAC').replace('Iran', 'EMEA').replace('Poland', 'EMEA').replace('Ecuador', 'LATAM').replace('Yugoslavia', 'APAC').replace('England', 'EMEA').replace('Columbia', 'LATAM').replace('Taiwan', 'APAC').replace('Dominican-Republic', 'LATAM').replace('El-Salvador', 'EMEA').replace('Guatemala', 'EMEA').replace('Italy', 'EMEA').replace('Peru', 'EMEA').replace('Trinadad&Tobago', 'EMEA').replace('Scotland', 'EMEA').replace('Greece', 'EMEA').replace('Hong', 'APAC').replace('Japan', 'APAC').replace('Philippines', 'APAC').replace('South', 'APAC').replace('France', 'EMEA').replace('Thailand', 'APAC').replace('Cambodia', 'EMEA').replace('Hungary', 'EMEA').replace('Ireland', 'EMEA').replace('Holand-Netherlands', 'EMEA')
 
 df['salary'].describe()
 
