@@ -12,6 +12,7 @@ import seaborn as sns
 import dtale as dt
 
 import os
+
 '''
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
@@ -19,7 +20,8 @@ os.chdir(dname)
 '''
 
 df = pd.read_csv("C:/Users/Naushina Farheen S/Dropbox/My PC (DESKTOP-4RG72G3)/Documents/GitHub/Adult-Census-Income-Prediction/adult.csv")# For Loading csv data.
-df = pd.read_csv('D:/Project/Adult-Census-Income-Prediction/adult.csv')#Vikram
+df = pd.read_csv('D:/Project/Adult-Census-Income-Prediction/adult.csv')#Vikram $ Mugesh
+
 
 
 
@@ -82,7 +84,7 @@ df['marital_status'] = df['marital_status'].replace('Never-married', 'Unmarried'
 df['occupation'].describe()
 df['occupation'].unique()
 df['occupation'].value_counts()
-df['occupation'] = df['occupation'].replace('Handlers-cleaners', 'Others').replace('Transport-moving', 'Others').replace('Farming-fishing', 'Others').replace('Tech-support', 'Others').replace('Protective-serv', 'Others').replace('Armed-Forces', 'Others').replace('Priv-house-serv', 'Others')
+#df['occupation'] = df['occupation'].replace('Handlers-cleaners', 'Others').replace('Transport-moving', 'Others').replace('Farming-fishing', 'Others').replace('Tech-support', 'Others').replace('Protective-serv', 'Others').replace('Armed-Forces', 'Others').replace('Priv-house-serv', 'Others')
 
 
 df['relationship'].describe()
@@ -113,21 +115,29 @@ df['country'] = df['country'].replace('Canada', 'APAC').replace('India', 'NAM').
 #https://istizada.com/list-of-emea-countries/
 
 df['salary'].describe()
+df['salary'].unique()
+df['salary'] = df['salary'].replace('<=50K', '0').replace('>50K', '1').astype('int64')
+
+df.dtypes
+
+def norm_func(i):
+	x = (i-i.min())	/(i.max()-i.min())
+	return(x)
 
 
+dummies = pd.get_dummies(df)
+
+   
+df = norm_func(dummies)
 
 
-
-df = pd.DataFrame(df)
-
-df.describe()
-
-df.var()
-df.skew()
 
 import dtale
-dtale.show(df)
+d = dtale.show(df)
 d.open_browser()
+
+
+
 
 
 #### Dtale
