@@ -20,9 +20,8 @@ os.chdir(dname)
 '''
 
 df = pd.read_csv("C:/Users/Naushina Farheen S/Dropbox/My PC (DESKTOP-4RG72G3)/Documents/GitHub/Adult-Census-Income-Prediction/adult.csv")# For Loading csv data.
-df = pd.read_csv('D:/Project/Adult-Census-Income-Prediction/adult.csv')#Vikram $ Mugesh
-
-
+df = pd.read_csv('D:/Project/Adult-Census-Income-Prediction/adult.csv')#Vikram 
+df = pd.read_csv('C:/Users/MUGESH/Desktop/project/Adult-Census-Income-Prediction/adult.csv')#Mugesh
 
 
 for col in df.columns:
@@ -30,6 +29,28 @@ for col in df.columns:
 
 df = df.rename({'education-num': 'education_num', 'marital-status': 'marital_status', 'capital-gain': 'capital_gain', 'capital-loss': 'capital_loss', 'hours-per-week': 'hpw'}, axis=1)
 
+#---- TO FIND ZERO VALUES IN DATA-------
+
+
+print("total number of rows : {0}".format(len(df)))
+print("number of rows missing age: {0}".format(len(df.loc[df['age'] == 0])))
+print("number of rows missing workclass: {0}".format(len(df.loc[df['workclass'] == 0])))
+print("number of rows missing fnlwgt: {0}".format(len(df.loc[df['fnlwgt'] == 0])))
+print("number of rows missing education: {0}".format(len(df.loc[df['education'] == 0])))
+print("number of rows missing education_num: {0}".format(len(df.loc[df['education_num'] == 0])))
+print("number of rows missing marital_status: {0}".format(len(df.loc[df['marital_status'] == 0])))
+print("number of rows missing occupation: {0}".format(len(df.loc[df['occupation'] == 0])))
+print("number of rows missing relationship: {0}".format(len(df.loc[df['relationship'] == 0])))
+print("number of rows missing race: {0}".format(len(df.loc[df['race'] == 0])))
+print("number of rows missing sex: {0}".format(len(df.loc[df['sex'] == 0])))
+print("number of rows missing capital_gain: {0}".format(len(df.loc[df['capital_gain'] == 0])))#27624
+print("number of rows missing capital_loss: {0}".format(len(df.loc[df['capital_loss'] == 0])))#28735
+print("number of rows missing country: {0}".format(len(df.loc[df['country'] == 0])))
+print("number of rows missing salary: {0}".format(len(df.loc[df['salary'] == 0])))
+
+# In capital gain and loss there are many zero values
+
+#---------- Finding NA------------
 
 df.replace(' ?', np.nan, inplace=True)
 df.isnull().mean()
@@ -130,16 +151,15 @@ dummies = pd.get_dummies(df)
    
 df = norm_func(dummies)
 
+#------To see the data is balanced
+Less_then = len(dummies.loc[dummies['salary'] == 0])
+Above_then = len(dummies.loc[dummies['salary'] == 1])
+(Less_then,Above_then)
 
 
 import dtale
 d = dtale.show(df)
 d.open_browser()
-
-
-
-
-
 #### Dtale
 d=dt.show(df)
 d.open_browser()
@@ -156,4 +176,36 @@ plt.boxplot(XYZ["input variable"],0,"rs",0)
 #plt.bar(output = XYZ, x = np.arange(1, 110, 1))
 plt.hist(XYZ) #histogram
 plt.boxplot(XYZ) #boxplot
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
