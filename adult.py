@@ -33,6 +33,11 @@ df = df.rename({'education-num': 'education_num', 'marital-status': 'marital_sta
 
 
 print("total number of rows : {0}".format(len(df)))
+
+for i in df.columns.values.tolist():
+    print("number of rows has 0 in", i,": {0}".format(len(df.loc[df[i] == 0])))
+    
+    
 print("number of rows missing age: {0}".format(len(df.loc[df['age'] == 0])))
 print("number of rows missing workclass: {0}".format(len(df.loc[df['workclass'] == 0])))
 print("number of rows missing fnlwgt: {0}".format(len(df.loc[df['fnlwgt'] == 0])))
@@ -52,16 +57,18 @@ print("number of rows missing salary: {0}".format(len(df.loc[df['salary'] == 0])
 
 #---------- Finding NA------------
 
-df.replace(' ?', np.nan, inplace=True)
-df.isnull().mean()
-df.dropna(inplace=True)
-
 
 for i in df.columns.values.tolist():
     if (df[i].dtype == 'O'):
         df[i] = df[i].str.strip()
     else:
         None
+
+
+
+df.replace('?', np.nan, inplace=True)
+df.isnull().mean()
+df.dropna(inplace=True)
 
 
 for col in df.columns:
@@ -87,8 +94,6 @@ df['fnlwgt'].describe()
 df['education'].describe()
 df['education'].unique()
 df['education'].value_counts()
-sns.histplot(df['education'])
-plt.plot(df['education'])
 df['education'] = df['education'].replace('Preschool', 'Below_College').replace('1st-4th', 'Below_College').replace('5th-6th', 'Below_College').replace('7th-8th', 'Below_College').replace('9th', 'Below_College').replace('10th', 'Below_College').replace('11th', 'Below_College').replace('12th', 'Below_College').replace('HS-grad', 'Below_College').replace('Assoc-acdm', 'Below_College').replace('Assoc-voc', 'Below_College').replace('Some-college', 'College').replace('Bachelors', 'College')
 
 
@@ -141,20 +146,117 @@ df['salary'] = df['salary'].replace('<=50K', '0').replace('>50K', '1').astype('i
 
 df.dtypes
 
+sns.pairplot(df)
+
+
+sns.histplot(df['fnlwgt'], kde=False).set(title = 'fnlwgt')
+sns.kdeplot(df['fnlwgt'])
+sns.lmplot(x='education_num', y='salary', data=df)
+
+sns.histplot(df['education_num'], kde=False).set(title = 'education_num')
+sns.kdeplot(df['education_num'])
+sns.lmplot(x='fnlwgt', y='salary', data=df)
+
+sns.histplot(df['capital_gain'], kde=False).set(title = 'capital_gain')
+sns.kdeplot(df['capital_gain'])
+sns.lmplot(x='capital_gain', y='salary', data=df)
+
+sns.histplot(df['capital_loss'], kde=False).set(title = 'capital_loss')
+sns.kdeplot(df['capital_loss'])
+sns.lmplot(x='capital_loss', y='salary', data=df)
+
+sns.histplot(df['hpw'], kde=False).set(title = 'hpw')
+sns.kdeplot(df['hpw'])
+sns.lmplot(x='hpw', y='salary', data=df)
+
+sns.histplot(df['salary'], kde=False).set(title = 'salary')
+sns.kdeplot(df['salary'])
+
+
+
+sns.countplot(x='age', data=df).set(title = 'age')
+sns.barplot(x='age',y='salary', hue = 'sex',data=df).set(title = 'age')
+
+sns.countplot(x='workclass', data=df).set(title = 'workclass')
+sns.barplot(x='workclass',y='salary', hue = 'sex',data=df).set(title = 'workclass')
+
+sns.countplot(x='education', data=df).set(title = 'education')
+sns.barplot(x='education',y='salary', hue = 'sex',data=df).set(title = 'education')
+
+sns.countplot(x='marital_status', data=df).set(title = 'marital_status')
+sns.barplot(x='marital_status',y='salary', hue = 'sex',data=df).set(title = 'marital_status')
+
+sns.countplot(x='occupation', data=df).set(title = 'occupation')
+sns.barplot(x='occupation',y='salary', hue = 'sex',data=df).set(title = 'occupation')
+
+sns.countplot(x='relationship', data=df).set(title = 'relationship')
+sns.barplot(x='relationship',y='salary', hue = 'sex',data=df).set(title = 'relationship')
+
+sns.countplot(x='race', data=df).set(title = 'race')
+sns.barplot(x='race',y='salary', hue = 'sex',data=df).set(title = 'race')
+
+sns.countplot(x='sex', data=df).set(title = 'sex')
+
+sns.countplot(x='country', data=df).set(title = 'country')
+sns.barplot(x='country',y='salary', hue = 'sex',data=df).set(title = 'country')
+
+
+
+
 def norm_func(i):
 	x = (i-i.min())	/(i.max()-i.min())
 	return(x)
 
 
-dummies = pd.get_dummies(df)
+sns.histplot(df['fnlwgt'], kde=False).set(title = 'fnlwgt')
+sns.kdeplot(df['fnlwgt'])
+
+sns.histplot(df['education_num'], kde=False).set(title = 'education_num')
+sns.kdeplot(df['education_num'])
+
+sns.histplot(df['capital_gain'], kde=False).set(title = 'capital_gain')
+sns.kdeplot(df['capital_gain'])
+
+sns.histplot(df['capital_loss'], kde=False).set(title = 'capital_loss')
+sns.kdeplot(df['capital_loss'])
+
+sns.histplot(df['hpw'], kde=False).set(title = 'hpw')
+sns.kdeplot(df['hpw'])
+
+sns.histplot(df['salary'], kde=False).set(title = 'salary')
+sns.kdeplot(df['salary'])
+
+
+df_new = pd.get_dummies(df)
 
    
-df = norm_func(dummies)
+df_new = norm_func(df_new)
 
 #------To see the data is balanced
-Less_then = len(dummies.loc[dummies['salary'] == 0])
-Above_then = len(dummies.loc[dummies['salary'] == 1])
+Less_then = len(df_new.loc[df_new['salary'] == 0])
+Above_then = len(df_new.loc[df_new['salary'] == 1])
 (Less_then,Above_then)
+
+
+#sns.pairplot(df)
+
+#get correlations of each features in dataset
+
+corrmat = df.corr()
+top_corr_features = corrmat.index
+plt.figure(figsize=(40,40))
+#plot heat map
+g = sns.heatmap(df[top_corr_features].corr(), annot = True, cmap = "RdYlGn")
+
+
+
+train, test = df.loc[:, df.columns != 'salary'], pd.DataFrame(df['salary'])
+
+
+
+
+
+
 
 
 import dtale
