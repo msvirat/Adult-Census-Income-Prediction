@@ -9,11 +9,12 @@ import pandas as pd# deals with data frame
 import numpy as np# deals with numerical values
 import matplotlib.pyplot as plt # mostly used for visualization purposes 
 import seaborn as sns
-import dtale as dt
 
-import os
+
 
 '''
+import os
+
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
@@ -37,7 +38,7 @@ print("total number of rows : {0}".format(len(df)))
 for i in df.columns.values.tolist():
     print("number of rows has 0 in", i,": {0}".format(len(df.loc[df[i] == 0])))
     
-    
+'''   
 print("number of rows missing age: {0}".format(len(df.loc[df['age'] == 0])))
 print("number of rows missing workclass: {0}".format(len(df.loc[df['workclass'] == 0])))
 print("number of rows missing fnlwgt: {0}".format(len(df.loc[df['fnlwgt'] == 0])))
@@ -54,7 +55,7 @@ print("number of rows missing country: {0}".format(len(df.loc[df['country'] == 0
 print("number of rows missing salary: {0}".format(len(df.loc[df['salary'] == 0])))
 
 # In capital gain and loss there are many zero values
-
+'''
 #---------- Finding NA------------
 
 
@@ -202,11 +203,16 @@ sns.barplot(x='country',y='salary', hue = 'sex',data=df).set(title = 'country')
 
 
 
+df_new = pd.get_dummies(df, drop_first=True)
+
+   
+
 
 def norm_func(i):
 	x = (i-i.min())	/(i.max()-i.min())
 	return(x)
 
+df_new = norm_func(df_new)
 
 sns.histplot(df['fnlwgt'], kde=False).set(title = 'fnlwgt')
 sns.kdeplot(df['fnlwgt'])
@@ -227,11 +233,6 @@ sns.histplot(df['salary'], kde=False).set(title = 'salary')
 sns.kdeplot(df['salary'])
 
 
-df_new = pd.get_dummies(df)
-
-   
-df_new = norm_func(df_new)
-
 #------To see the data is balanced
 Less_then = len(df_new.loc[df_new['salary'] == 0])
 Above_then = len(df_new.loc[df_new['salary'] == 1])
@@ -250,7 +251,90 @@ g = sns.heatmap(df[top_corr_features].corr(), annot = True, cmap = "RdYlGn")
 
 
 
-train, test = df.loc[:, df.columns != 'salary'], pd.DataFrame(df['salary'])
+X, Y = df_new.loc[:, df_new.columns != 'salary'], pd.DataFrame(df_new['salary'])
+
+#----Model Selection----
+from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold, cross_val_score
+from sklearn.linear_model import  LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+import shutup
+
+
+
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=1)
+    
+
+def get_score(model, X_train, X_test, y_train, y_test):
+    model.fit(X_train, y_train)
+    return model.score(X_test, y_test)
+
+
+#Parameter selection - LogisticRegression
+log_model = LogisticRegression()
+param_grid = [ {'penalty' : ['l1', 'l2', 'elasticnet', 'none'], 'C' : np.logspace(-4, 4, 20), 'solver' : ['lbfgs','newton-cg','liblinear','sag','saga'], 'max_iter' : [100, 1000,2500, 5000] } ] 
+clf = GridSearchCV(log_model, param_grid = param_grid, cv = 3, verbose=True, n_jobs=-1)
+best_clf = clf.fit(x_train, y_train)
+shutup.please()
+#Best parameter as per our input
+best_clf.best_estimator_
+
+
+
+#LogisticRegression - for train
+log_model = LogisticRegression(C=0.0001, penalty='none', solver='sag')
+get_score(log_model, x_train, x_test, y_train, y_test)
+
+
+
+#RandomForestClassifier - for train model
+random_forest = RandomForestClassifier(n_estimators=40)
+get_score(random_forest, x_train, x_test, y_train, y_test)
+
+
+#SVC - for train model
+svm = SVC()
+get_score(svm, x_train, x_test, y_train, y_test)
+
+
+#K-Fold - model Selection
+
+folds = StratifiedKFold(n_splits=5)
+
+scores_logistic = []
+scores_svm = []
+scores_rf = []
+
+for train_index, test_index in folds.split(X,Y):
+    x_train, x_test, y_train, y_test = X.iloc[train_index], X.iloc[test_index], Y.iloc[train_index], Y.iloc[test_index]
+    scores_logistic.append(get_score(LogisticRegression(C=0.0001, penalty='none', solver='sag'), x_train, x_test, y_train, y_test)) 
+    scores_rf.append(get_score(RandomForestClassifier(n_estimators=40), x_train, x_test, y_train, y_test))
+    scores_svm.append(get_score(SVC(gamma='auto'), x_train, x_test, y_train, y_test))
+
+
+scores_logistic
+
+scores_svm
+
+scores_rf
+
+
+#cross_val_score for X and Y
+cross_val_score(LogisticRegression(C = 0.0001, penalty = 'none', solver='sag'), x_test, y_test, cv = 5)
+cross_val_score(RandomForestClassifier(n_estimators=40), x_test, y_test, cv = 5)
+cross_val_score(SVC(gamma='auto'), x_test, y_test, cv = 5)
+
+
+#LogisticRegression - For main Data
+
+log_model = LogisticRegression(C = 0.0001, penalty = 'none', solver='sag')
+log_model = log_model.fit(X, Y)
+
+log_model.score(X, Y)
+
+
+
 
 
 
@@ -262,22 +346,6 @@ train, test = df.loc[:, df.columns != 'salary'], pd.DataFrame(df['salary'])
 import dtale
 d = dtale.show(df)
 d.open_browser()
-#### Dtale
-d=dt.show(df)
-d.open_browser()
-
-df['occupation'].unique()
-df['country'].unique()
-
-df.mode()
-
-plt.hist(df["output variable"])  #right skewed =0.647
-plt.hist(XYZ["input variable"])  #right skewed =0.858
-plt.boxplot(XYZ["output variable"],0,"rs",0) #Graphical representation for outliers present
-plt.boxplot(XYZ["input variable"],0,"rs",0) 
-#plt.bar(output = XYZ, x = np.arange(1, 110, 1))
-plt.hist(XYZ) #histogram
-plt.boxplot(XYZ) #boxplot
 
 
 
