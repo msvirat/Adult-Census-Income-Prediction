@@ -38,24 +38,6 @@ print("total number of rows : {0}".format(len(df)))
 for i in df.columns.values.tolist():
     print("number of rows has 0 in", i,": {0}".format(len(df.loc[df[i] == 0])))
     
-'''   
-print("number of rows missing age: {0}".format(len(df.loc[df['age'] == 0])))
-print("number of rows missing workclass: {0}".format(len(df.loc[df['workclass'] == 0])))
-print("number of rows missing fnlwgt: {0}".format(len(df.loc[df['fnlwgt'] == 0])))
-print("number of rows missing education: {0}".format(len(df.loc[df['education'] == 0])))
-print("number of rows missing education_num: {0}".format(len(df.loc[df['education_num'] == 0])))
-print("number of rows missing marital_status: {0}".format(len(df.loc[df['marital_status'] == 0])))
-print("number of rows missing occupation: {0}".format(len(df.loc[df['occupation'] == 0])))
-print("number of rows missing relationship: {0}".format(len(df.loc[df['relationship'] == 0])))
-print("number of rows missing race: {0}".format(len(df.loc[df['race'] == 0])))
-print("number of rows missing sex: {0}".format(len(df.loc[df['sex'] == 0])))
-print("number of rows missing capital_gain: {0}".format(len(df.loc[df['capital_gain'] == 0])))#27624
-print("number of rows missing capital_loss: {0}".format(len(df.loc[df['capital_loss'] == 0])))#28735
-print("number of rows missing country: {0}".format(len(df.loc[df['country'] == 0])))
-print("number of rows missing salary: {0}".format(len(df.loc[df['salary'] == 0])))
-
-# In capital gain and loss there are many zero values
-'''
 #---------- Finding NA------------
 
 
@@ -257,7 +239,7 @@ X, Y = df_new.loc[:, df_new.columns != 'salary'], pd.DataFrame(df_new['salary'])
 from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold, cross_val_score
 from sklearn.linear_model import  LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.svm import SVC
 import shutup
 
@@ -284,11 +266,79 @@ best_clf.best_estimator_
 
 #LogisticRegression - for train
 log_model = LogisticRegression(C=0.0001, penalty='none', solver='sag')
-get_score(log_model, x_train, x_test, y_train, y_test)
+get_score(log_model, x_train, x_test, y_train, y_test)#0.8491629371788496
+
+
+
+#Random forest HyperParameter selection
+
+# Number of trees in random forest
+n_estimators = [int(x) for x in np.linspace(start = 10, stop = 80, num = 10)]
+# Number of features to consider at every split
+max_features = ['auto', 'sqrt']
+# Maximum number of levels in tree
+max_depth = [2,4]
+# Minimum number of samples required to split a node
+min_samples_split = [2, 5]
+# Minimum number of samples required at each leaf node
+min_samples_leaf = [1, 2]
+# Method of selecting samples for training each tree
+bootstrap = [True, False]
+# Create the param grid
+param_grid = {'n_estimators': n_estimators,
+               'max_features': max_features,
+               'max_depth': max_depth,
+               'min_samples_split': min_samples_split,
+               'min_samples_leaf': min_samples_leaf,
+               'bootstrap': bootstrap}
+print(param_grid)
+
+random_forest = RandomForestClassifier()
+rf_Grid = GridSearchCV(estimator = random_forest, param_grid = param_grid, verbose=2, n_jobs = 4)
+rf_Grid.fit(x_train, y_train)
+
+rf_Grid.best_params_
+
+print (f'Train Accuracy - : {rf_Grid.score(x_train,y_train):.3f}')
+print (f'Test Accuracy - : {rf_Grid.score(x_test,y_test):.3f}')
+
+
+
+vc = VotingClassifier([('clf1', log_model), ('clf2', rf_Grid)], voting='soft')
+cross_val_score(vc, X, Y).mean()
+
+
+
+
+
+
+svm = SVC()
+param_grid={'kernel': ['linear'],
+      'C':np.arange(1,10,5),
+      'degree':np.arange(3,6),   
+      'coef0':np.arange(0.001,3,0.5),
+      'gamma': ('auto', 'scale')}
+svm_Grid = GridSearchCV(estimator = svm, param_grid = param_grid, cv = 3, verbose=2, n_jobs = 4)
+
+svm_Grid.fit(x_train, np.ravel(y_train,order='C'))
+
+svm_Grid.best_params_
+
+print (f'Train Accuracy - : {svm_Grid.score(x_train,y_train):.3f}')
+print (f'Test Accuracy - : {svm_Grid.score(x_test,y_test):.3f}')
+
+
+
+param_grid={'kernel':('linear', 'poly', 'rbf', 'sigmoid'),
+      'C':np.arange(1,42,10),
+      'degree':np.arange(3,6),   
+      'coef0':np.arange(0.001,3,0.5),
+      'gamma': ('auto', 'scale')}
 
 
 
 #RandomForestClassifier - for train model
+
 random_forest = RandomForestClassifier(n_estimators=40)
 get_score(random_forest, x_train, x_test, y_train, y_test)
 
