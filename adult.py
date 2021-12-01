@@ -256,7 +256,7 @@ def get_score(model, X_train, X_test, y_train, y_test):
 #Parameter selection - LogisticRegression
 log_model = LogisticRegression()
 param_grid = [ {'penalty' : ['l1', 'l2', 'elasticnet', 'none'], 'C' : np.logspace(-4, 4, 20), 'solver' : ['lbfgs','newton-cg','liblinear','sag','saga'], 'max_iter' : [100, 1000,2500, 5000] } ] 
-clf = GridSearchCV(log_model, param_grid = param_grid, cv = 3, verbose=True, n_jobs=-1)
+clf = RandomizedSearchCV(log_model, param_distributions = param_grid, cv = 3, verbose=True, n_jobs=-1)
 best_clf = clf.fit(x_train, y_train)
 shutup.please()
 #Best parameter as per our input
@@ -265,7 +265,8 @@ best_clf.best_estimator_
 
 
 #LogisticRegression - for train
-log_model = LogisticRegression(C=0.0001, penalty='none', solver='sag')
+log_model = LogisticRegression(C=0.012742749857031334, max_iter=2500, penalty='none', solver='saga')
+
 get_score(log_model, x_train, x_test, y_train, y_test)#0.8491629371788496
 
 
@@ -503,22 +504,86 @@ d.open_browser()
 
 
 
+from xgboost import XGBClassifier
+
+model = XGBClassifier()
+
+model.fit(x_train, y_train)
+y_train_predict = model.predict(x_train)
+y_predict = model.predict(x_test)
+print('Train accuracy', accuracy_score(y_train, y_train_predict))
+print('Test accuracy', accuracy_score(y_test, y_predict))
+
+
+## Hyper Parameter Optimization
+
+params={
+ "learning_rate"    : [0.05, 0.10, 0.15, 0.20, 0.25, 0.30 ] ,
+ "max_depth"        : [ 3, 4, 5, 6, 8, 10, 12, 15],
+ "min_child_weight" : [ 1, 3, 5, 7 ],
+ "gamma"            : [ 0.0, 0.1, 0.2 , 0.3, 0.4 ],
+ "colsample_bytree" : [ 0.3, 0.4, 0.5 , 0.7 ]
+    
+}
+
+
+## Hyperparameter optimization using RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
+from datetime import datetime
+
+
+def timer(start_time=None):
+    if not start_time:
+        start_time = datetime.now()
+        return start_time
+    elif start_time:
+        thour, temp_sec = divmod((datetime.now() - start_time).total_seconds(), 3600)
+        tmin, tsec = divmod(temp_sec, 60)
+        print('\n Time taken: %i hours %i minutes and %s seconds.' % (thour, tmin, round(tsec, 2)))
+
+
+
+classifier = XGBClassifier()
+
+
+random_search = RandomizedSearchCV(classifier, param_distributions=params, n_iter=5, scoring='roc_auc', n_jobs=-1, cv=5, verbose=3)
+
+
+# Here we go
+start_time = timer(None) # timing starts from this point for "start_time" variable
+random_search.fit(x_train, y_train)
+timer(start_time) # timing ends here for "start_time" variable
+
+
+random_search.best_estimator_
+random_search.best_params_
 
 
 
 
 
+model_1 = XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,
+              colsample_bynode=1, colsample_bytree=0.7,
+              enable_categorical=False, gamma=0.3, gpu_id=-1,
+              importance_type=None, interaction_constraints='',
+              learning_rate=0.25, max_delta_step=0, max_depth=4,
+              min_child_weight=5, monotone_constraints='()',
+              n_estimators=100, n_jobs=8, num_parallel_tree=1, predictor='auto',
+              random_state=0, reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
+              subsample=1, tree_method='exact', validate_parameters=1,
+              verbosity=None)
+
+
+model_1.fit(x_train, y_train)
+y_train_predict = model_1.predict(x_train)
+y_predict = model_1.predict(x_test)
+print('Train accuracy', accuracy_score(y_train, y_train_predict))
+print('Test accuracy', accuracy_score(y_test, y_predict))
 
 
 
-
-
-
-
-
-
-
-
+from sklearn.model_selection import cross_val_score
+score=cross_val_score(model_1, X, Y, cv=10)
 
 
 
