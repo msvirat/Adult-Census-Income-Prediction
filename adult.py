@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Oct 24 08:57:16 2021
-
-@author: Naushina Farheen S
-"""
-
 import pandas as pd# deals with data frame 
 import numpy as np# deals with numerical values
 import matplotlib.pyplot as plt # mostly used for visualization purposes 
@@ -22,7 +15,7 @@ os.chdir(dname)
 
 df = pd.read_csv("C:/Users/Naushina Farheen S/Dropbox/My PC (DESKTOP-4RG72G3)/Documents/GitHub/Adult-Census-Income-Prediction/adult.csv")# For Loading csv data.
 df = pd.read_csv('D:/Project/Adult-Census-Income-Prediction/adult.csv')#Vikram 
-df = pd.read_csv('C:/Users/MUGESH/Desktop/project/Adult-Census-Income-Prediction/adult.csv')#Mugesh
+df = pd.read_csv('C:/Users/MUGESH/Documents/GitHub/Adult-Census-Income-Prediction/adult.csv')#Mugesh
 
 
 for col in df.columns:
@@ -252,7 +245,7 @@ def get_score(model, X_train, X_test, y_train, y_test):
     model.fit(X_train, y_train)
     return model.score(X_test, y_test)
 
-
+'''
 #Parameter selection - LogisticRegression
 log_model = LogisticRegression()
 param_grid = [ {'penalty' : ['l1', 'l2', 'elasticnet', 'none'], 'C' : np.logspace(-4, 4, 20), 'solver' : ['lbfgs','newton-cg','liblinear','sag','saga'], 'max_iter' : [100, 1000,2500, 5000] } ] 
@@ -497,10 +490,11 @@ sns.distplot(y_test-prediction_lasso.reshape(6032,1))
 sns.distplot(y_test-prediction_ridge)
 
 
+pip install dtale
 import dtale
 d = dtale.show(df)
 d.open_browser()
-
+'''
 
 
 
@@ -523,7 +517,7 @@ params={
  "min_child_weight" : [ 1, 3, 5, 7 ],
  "gamma"            : [ 0.0, 0.1, 0.2 , 0.3, 0.4 ],
  "colsample_bytree" : [ 0.3, 0.4, 0.5 , 0.7 ]
-    
+
 }
 
 
@@ -577,15 +571,13 @@ model_1 = XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,
 model_1.fit(x_train, y_train)
 y_train_predict = model_1.predict(x_train)
 y_predict = model_1.predict(x_test)
-print('Train accuracy', accuracy_score(y_train, y_train_predict))
-print('Test accuracy', accuracy_score(y_test, y_predict))
+print('Train accuracy', accuracy_score(y_train, y_train_predict))#0.873678
+print('Test accuracy', accuracy_score(y_test, y_predict))#0.867395
 
+model_1 = model_1.fit(X,Y)
+model_1.score(X,Y)#0.8731184
 
-
-from sklearn.model_selection import cross_val_score
-score=cross_val_score(model_1, X, Y, cv=10)
-
-
+ 
 
 
 
