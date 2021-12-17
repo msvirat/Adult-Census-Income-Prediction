@@ -1,3 +1,6 @@
+
+
+
 import pandas as pd# deals with data frame 
 import numpy as np# deals with numerical values
 import matplotlib.pyplot as plt # mostly used for visualization purposes 
@@ -229,13 +232,15 @@ g = sns.heatmap(df[top_corr_features].corr(), annot = True, cmap = "RdYlGn")
 X, Y = df_new.loc[:, df_new.columns != 'salary'], pd.DataFrame(df_new['salary'])
 
 #----Model Selection----
-from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold, cross_val_score
-from sklearn.linear_model import  LogisticRegression
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-from sklearn.ensemble import RandomForestClassifier, VotingClassifier
-from sklearn.svm import SVC
-import shutup
 
+
+#from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+#from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+#from sklearn.svm import SVC
+
+
+
+from sklearn.model_selection import train_test_split
 
 
 x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=1)
@@ -246,10 +251,6 @@ def get_score(model, X_train, X_test, y_train, y_test):
     return model.score(X_test, y_test)
 
 
-
-
-## Hyperparameter optimization using RandomizedSearchCV
-from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
 from datetime import datetime
 
 
@@ -264,15 +265,151 @@ def timer(start_time=None):
 
 
 
+## Hyperparameter optimization using RandomizedSearchCV
+
+#Log model
+
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.linear_model import  LogisticRegression
+from sklearn.metrics import accuracy_score
+
+
+
 log_model = LogisticRegression()
 param_grid = [ {'penalty' : ['l1', 'l2', 'elasticnet', 'none'], 'C' : np.logspace(-4, 4, 20), 'solver' : ['lbfgs','newton-cg','liblinear','sag','saga'], 'max_iter' : [100, 1000,2500, 5000] } ] 
-clf = RandomizedSearchCV(log_model, param_distributions = param_grid, cv = 3, verbose=True, n_jobs=-1)
-best_clf = clf.fit(x_train, y_train)
-shutup.please()
-#Best parameter as per our input
-best_clf.best_estimator_
 
 
+random_search_log = RandomizedSearchCV(log_model, param_distributions=param_grid, n_iter=5, scoring='roc_auc', n_jobs=-1, cv=5, verbose=3)
+
+
+# Here we go
+start_time = timer(None) # timing starts from this point for "start_time" variable
+random_search_log.fit(x_train, y_train)
+timer(start_time) # timing ends here for "start_time" variable
+
+
+random_search_log.best_estimator_
+random_search_log.best_params_
+
+
+log_model_1 = LogisticRegression(solver= 'lbfgs', penalty= 'l2', max_iter= 5000, C =  545.559)
+
+
+
+
+log_model_1.fit(x_train, y_train)
+y_train_predict = log_model_1.predict(x_train)
+y_predict = log_model_1.predict(x_test)
+print('Train accuracy', accuracy_score(y_train, y_train_predict))#0.847
+print('Test accuracy', accuracy_score(y_test, y_predict))#0.849
+
+log_model_1 = log_model_1.fit(X,Y)
+log_model_1.score(X,Y)#0.848
+
+ 
+
+
+#Random Forest
+from sklearn.ensemble import RandomForestClassifier
+
+RF_model = RandomForestClassifier()
+
+#Random forest HyperParameter selection
+
+# Number of trees in random forest
+n_estimators = [int(x) for x in np.linspace(start = 10, stop = 80, num = 10)]
+# Number of features to consider at every split
+max_features = ['auto', 'sqrt']
+# Maximum number of levels in tree
+max_depth = [2,4]
+# Minimum number of samples required to split a node
+min_samples_split = [2, 5]
+# Minimum number of samples required at each leaf node
+min_samples_leaf = [1, 2]
+# Method of selecting samples for training each tree
+bootstrap = [True, False]
+# Create the param grid
+param_grid = {'n_estimators': n_estimators,
+               'max_features': max_features,
+               'max_depth': max_depth,
+               'min_samples_split': min_samples_split,
+               'min_samples_leaf': min_samples_leaf,
+               'bootstrap': bootstrap}
+print(param_grid)
+
+random_search_RF = RandomizedSearchCV(RF_model, param_distributions=param_grid, n_iter=5, scoring='roc_auc', n_jobs=-1, cv=5, verbose=3)
+
+
+# Here we go
+start_time = timer(None) # timing starts from this point for "start_time" variable
+random_search_RF.fit(x_train, y_train)
+timer(start_time) # timing ends here for "start_time" variable
+
+
+random_search_RF.best_estimator_
+random_search_RF.best_params_
+
+
+RF_model_1 = RandomForestClassifier(n_estimators= 33,
+ min_samples_split= 2,
+ min_samples_leaf= 1,
+ max_features= 'sqrt',
+ max_depth= 4,
+ bootstrap= True)
+
+
+
+
+RF_model_1.fit(x_train, y_train)
+y_train_predict = RF_model_1.predict(x_train)
+y_predict = RF_model_1.predict(x_test)
+print('Train accuracy', accuracy_score(y_train, y_train_predict))#0.83
+print('Test accuracy', accuracy_score(y_test, y_predict))#0.83
+
+RF_model_1 = RF_model_1.fit(X,Y)
+RF_model_1.score(X,Y)#0.84
+
+ 
+
+#SVM model
+
+from sklearn.svm import SVC
+
+svm_model = SVC()
+param_grid={'kernel': ['linear'],
+      'C':np.arange(1,10,5),
+      'degree':np.arange(3,6),   
+      'coef0':np.arange(0.001,3,0.5),
+      'gamma': ('auto', 'scale')}
+
+random_search_svm = RandomizedSearchCV(svm_model, param_distributions=param_grid, n_iter=5, scoring='roc_auc', n_jobs=-1, cv=5, verbose=3)
+
+
+# Here we go
+start_time = timer(None) # timing starts from this point for "start_time" variable
+random_search_svm.fit(x_train, y_train)
+timer(start_time) # timing ends here for "start_time" variable
+
+
+random_search_svm.best_estimator_
+random_search_svm.best_params_
+
+
+svm_model_1 = SVC(kernel='linear', gamma='auto', degree=3, coef0=1.001, C=6)
+
+svm_model_1.fit(x_train, y_train)
+y_train_predict = svm_model_1.predict(x_train)
+y_predict = svm_model_1.predict(x_test)
+print('Train accuracy', accuracy_score(y_train, y_train_predict))#0.847
+print('Test accuracy', accuracy_score(y_test, y_predict))#0.847
+
+svm_model_1 = svm_model_1.fit(X,Y)
+svm_model_1.score(X,Y)#0.847
+
+
+
+
+#XG Boost
 
 
 from xgboost import XGBClassifier
