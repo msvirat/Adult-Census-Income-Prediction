@@ -478,13 +478,26 @@ model_1.score(X,Y)#0.8731184
 
  
 
+import pickle
+
+pickle.dump(model_1, open('model.pkl', 'wb'))
 
 
+Dumm = pd.DataFrame([215], columns=['Name'])
+Dumm_dumm = pd.get_dummies(Dumm)
 
 
+def norm_func(i):
+    x = (i-i.min())	/(i.max()-i.min())
+    return(x)
 
+Dumm_dumm = norm_func(Dumm)
 
+x_train.columns
+model_1.predict(dummm)
+df_new.iloc[-1]
 
+dummm = pd.DataFrame(x_train.iloc[-1:,])
 
-
+df['age'].astype(int)
 
